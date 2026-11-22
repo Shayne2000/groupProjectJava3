@@ -11,17 +11,45 @@ import java.net.*;
  * @author Shayne
  */
 
+class handCheakingListener extends Thread{
+    ServerSocket ss ;
+    handCheakingListener() {
+        try {
+            ss = new ServerSocket(1234);
+        } catch (IOException ex) {
+            System.getLogger(handCheakingListener.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        start();
+    }
+    
+    @Override
+    public void run() {
+        while (true){
+            try {
+                Socket socket = ss.accept();
+                new serverThread(socket);
+            } catch (IOException ex) {
+                System.getLogger(handCheakingListener.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
+        }
+            
+    }
+}
+
 class serverThread extends Thread{
     
     Socket soc;
-    clientThread client;
+    
+    serverThread(Socket s){
+        soc = s;
+        System.out.println("Server is constructed");
+        start();
+        
+    }
     
     @Override
     public void run() {
         try {
-            ServerSocket ss = new ServerSocket(1234);
-            soc = ss.accept();
-            
             BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
             System.out.println("server is waiting");
             System.out.println("Client says: " + in.readLine());
@@ -32,13 +60,6 @@ class serverThread extends Thread{
         System.out.println("end server thread");
     }
     
-    public Socket getSocket() {
-        return soc;
-    }
-    
-    public void setClient(clientThread o) {
-        client = o;
-    }
 }
 
 
@@ -68,9 +89,6 @@ class clientThread extends Thread{
         System.out.println("end client thread");
     }
     
-    public Socket getSocket() {
-        return socket;
-    }
 }
 
 public class socketTest {
@@ -78,9 +96,9 @@ public class socketTest {
     public static void main(String[] args) {
         System.out.println("Hello World!");
         
+        new handCheakingListener();
         
-        
-        serverThread a = new serverThread();
+        clientThread a = new clientThread();
         clientThread b = new clientThread();
         
         
@@ -88,16 +106,6 @@ public class socketTest {
         a.start();
         
         b.start();
-        
-        
-        
-//        BufferedReader in;
-//        try {
-//            in = new BufferedReader(new InputStreamReader(b.getSocket().getInputStream()));
-//            System.out.println("Client says: " + in.readLine());
-//        } catch (IOException ex) {
-//            System.getLogger(socketTest.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-//        }
         
         
         
